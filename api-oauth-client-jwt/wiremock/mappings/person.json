@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/person",
+    "headers": {
+      "Authorization": {
+        "equalTo": "Bearer token-123"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "firstName": "Ada",
+      "lastName": "Lovelace"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

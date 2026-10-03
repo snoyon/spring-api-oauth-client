@@ -1,0 +1,32 @@
+# Maven
+target/
+**/target/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+hs_err_pid*
+
+# Operating system files
+.DS_Store
+Thumbs.db

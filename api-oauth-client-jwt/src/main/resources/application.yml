@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: spring-api-oauth-client
+
+external-person:
+  base-url: http://localhost:9561
+  token-uri: http://localhost:9561/oauth/token

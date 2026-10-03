@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example</groupId>
+    <artifactId>multi-module-parent</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>multi-module-parent</name>
+
+    <properties>
+        <spring-boot.version>4.0.4</spring-boot.version>
+        <java.version>21</java.version>
+        <wiremock.version>3.13.1</wiremock.version>
+        <maven.compiler-plugin.version>3.14.1</maven.compiler-plugin.version>
+        <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
+        <spring-boot-maven-plugin.version>${spring-boot.version}</spring-boot-maven-plugin.version>
+    </properties>
+
+    <modules>
+        <module>api-oauth-client-cc</module>
+        <module>api-oauth-client-jwt</module>
+    </modules>
+</project>

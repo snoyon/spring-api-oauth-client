@@ -1,0 +1,26 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/oauth/token",
+    "basicAuthCredentials": {
+      "username": "mock-client",
+      "password": "mock-secret"
+    },
+    "bodyPatterns": [
+      {
+        "contains": "grant_type=client_credentials"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "access_token": "token-123",
+      "token_type": "Bearer",
+      "expires_in": 300
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
