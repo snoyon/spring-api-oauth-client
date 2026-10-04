@@ -1,5 +1,102 @@
 # Spring API OAuth client
 
+## Référence OAuth2 : RFC 6749
+
+Ce module met en œuvre le flux **Client Credentials Grant** décrit dans la
+[RFC 6749 – The OAuth 2.0 Authorization Framework](https://www.rfc-editor.org/rfc/rfc6749.html),
+notamment sa section [4.4](https://www.rfc-editor.org/rfc/rfc6749.html#section-4.4).
+
+Ce flux est destiné aux échanges de machine à machine : l'application agit en son propre nom
+et obtient un access token auprès du serveur d'autorisation en s'authentifiant avec son
+`client_id` et son `client_secret`. Aucun utilisateur n'intervient dans le flux.
+
+Dans cette maquette, l'authentification du client auprès du token endpoint utilise la méthode
+`client_secret_basic` : le `client_id` et le `client_secret` sont transmis dans l'en-tête HTTP
+`Authorization` via le mécanisme Basic Auth, sur une connexion HTTPS en production. D'autres
+modes d'authentification du client sont également possibles selon les capacités du serveur
+d'autorisation, mais ils ne sont pas détaillés ici.
+
+Spring Security masque cette mécanique au code métier. Lors du premier appel à l'API externe,
+le token est récupéré puis ajouté dans l'en-tête `Authorization`. Tant qu'il reste valide,
+le même token est réutilisé ; un nouveau token n'est demandé qu'à son expiration.
+
+```mermaid
+sequenceDiagram
+    participant App as Application
+    participant Manager as OAuth2AuthorizedClientManager
+    participant Auth as Serveur d'autorisation
+    participant API as API externe
+
+    App->>Manager: GET /external/person
+    Manager->>Manager: Recherche d'un access token valide
+    alt Aucun token valide
+        Manager->>Auth: POST /oauth/token<br/>grant_type=client_credentials
+        Auth-->>Manager: access_token + expires_in
+        Manager->>Manager: Stockage du token
+    end
+    Manager-->>App: Token Bearer disponible
+    App->>API: GET /person<br/>Authorization: Bearer access_token
+    API-->>App: Personne fictive (JSON)
+
+    App->>Manager: Appel suivant
+    Manager->>Manager: Réutilisation du token s'il est encore valide
+    Manager-->>App: Token Bearer disponible
+    App->>API: GET /person<br/>Authorization: Bearer access_token
+    API-->>App: Personne fictive (JSON)
+```
+
+## Séquence technique
+
+Le diagramme suivant reprend les classes réellement impliquées, avec leur couche, depuis
+l'endpoint entrant jusqu'à l'API externe. `GetExternalPersonService` implémente le port
+`application / GetExternalPerson` et `ExternalPersonClient` implémente le port
+`domain / PersonGateway`.
+
+```mermaid
+sequenceDiagram
+    participant C as api / ExternalPersonController
+    participant S as application / GetExternalPersonService
+    participant G as domain / PersonGateway
+    participant E as infrastructure / ExternalPersonClient
+    participant R as infrastructure / RestClient
+    participant I as infrastructure / OAuth2ClientHttpRequestInterceptor
+    participant M as infrastructure / OAuth2AuthorizedClientManager
+    participant Reg as infrastructure / ClientRegistrationRepository
+    participant Store as infrastructure / OAuth2AuthorizedClientService
+    participant P as infrastructure / ClientCredentialsOAuth2AuthorizedClientProvider
+    participant T as external / OAuth2 Token Endpoint
+    participant API as external / Person API
+
+    C->>S: execute()
+    Note over S: implements application / GetExternalPerson
+    S->>G: getPerson()
+    Note over G: port implemented by infrastructure / ExternalPersonClient
+    G->>E: getPerson()
+    E->>R: GET /person
+    R->>I: Interception de la requête
+    I->>M: authorize(external-person)
+    M->>Reg: Recherche de la registration
+    Reg-->>M: ClientRegistration
+    M->>Store: Recherche du client autorisé
+    alt Aucun access token valide
+        M->>P: Exécution du grant client_credentials
+        P->>T: POST /oauth/token<br/>Basic client_id:client_secret
+        T-->>P: access_token + expires_in
+        P-->>M: OAuth2AuthorizedClient
+        M->>Store: Stockage du client autorisé
+    else Access token encore valide
+        Store-->>M: OAuth2AuthorizedClient existant
+    end
+    M-->>I: access_token
+    I-->>R: Ajout Authorization: Bearer
+    R->>API: GET /person
+    API-->>R: Personne JSON
+    R-->>E: Person
+    E-->>G: Person
+    G-->>S: Person
+    S-->>C: PersonResponse
+```
+
 API maquette en Java avec Spring Boot 4.0.4 et quatre couches :
 
 - `api` : exposition HTTP (`GET /external/person`)
@@ -221,6 +318,8 @@ Puis lancer l'API :
 ```shell
 mvn spring-boot:run
 ```
+
+Appeler directement l'API : [http://localhost:8080/external/person](http://localhost:8080/external/person)
 
 ## Vérifier
 

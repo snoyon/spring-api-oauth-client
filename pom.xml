@@ -22,5 +22,6 @@
     <modules>
         <module>api-oauth-client-cc</module>
         <module>api-oauth-client-jwt</module>
+        <module>api-nooauth-client</module>
     </modules>
 </project>

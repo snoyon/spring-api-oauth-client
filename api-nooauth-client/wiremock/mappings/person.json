@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/person"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "firstName": "Ada",
+      "lastName": "Lovelace"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
